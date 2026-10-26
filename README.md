@@ -27,16 +27,14 @@ A high-performance, dark-mode agency operating system built with **React 19**, *
 ---
 
 ## 👥 Demo Accounts & Credentials
+### Sole Admin Account
 
-You can sign in using any of the pre-configured accounts directly from the login page or using the demo switcher:
-
-| Name | Role | Identifier | Default Password | Access Level |
+| Name | Role | Identifier / Username | Email | Access Level |
 | :--- | :--- | :--- | :--- | :--- |
-| **Owais Anwer** | Admin | `owais` | `admin123` | Managing Director & SuperAdmin |
-| **Carlos Mendes** | Admin | `carlos` | `admin123` | Lead Design Architect |
-| **Sarah Jenkins** | Client | `sarah.arc` | `client123` | Arc Company Portal Owner |
-| **Elena Rostova** | Client | `elena.nexus` | `client123` | Nexus Labs Portal Owner |
-| **David Chen** | Client | `dchen.lumina` | `client123` | Lumina Health Portal Owner |
+| **Timi** | Admin | `timi` | `timi@vectorstudio.design` | Managing Director & SuperAdmin |
+
+> [!NOTE]
+> All test demo users have been removed from the production database. Client accounts can be provisioned through the **Client Accounts** tab in Executive Admin Operations.
 
 ---
 

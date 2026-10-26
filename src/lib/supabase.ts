@@ -287,9 +287,11 @@ export const pullStateFromSupabase = async (): Promise<Partial<AgencyState> | nu
       client.from('agency_client_accounts').select('*')
     ]);
 
-    const result: Partial<AgencyState> = {};
+    const result: Partial<AgencyState> = {
+      admin: {} as any
+    };
 
-    if (usersRes.data && usersRes.data.length > 0) {
+    if (usersRes.data) {
       result.users = usersRes.data.map((row: any): AppUser => ({
         id: row.id,
         name: row.name,
@@ -309,7 +311,7 @@ export const pullStateFromSupabase = async (): Promise<Partial<AgencyState> | nu
       }));
     }
 
-    if (tasksRes.data && tasksRes.data.length > 0) {
+    if (tasksRes.data) {
       const fetchedTasks: Task[] = tasksRes.data.map((row: any) => ({
         id: row.id,
         title: row.title,
@@ -329,7 +331,7 @@ export const pullStateFromSupabase = async (): Promise<Partial<AgencyState> | nu
       };
     }
 
-    if (meetingsRes.data && meetingsRes.data.length > 0) {
+    if (meetingsRes.data) {
       const fetchedMeetings: MeetingItem[] = meetingsRes.data.map((row: any) => ({
         id: row.id,
         title: row.title,
@@ -344,7 +346,7 @@ export const pullStateFromSupabase = async (): Promise<Partial<AgencyState> | nu
       result.meetings = fetchedMeetings;
     }
 
-    if (messagesRes.data && messagesRes.data.length > 0) {
+    if (messagesRes.data) {
       const fetchedMessages: TeamMessage[] = messagesRes.data.map((row: any) => ({
         id: row.id,
         senderId: row.sender_id,
@@ -358,7 +360,7 @@ export const pullStateFromSupabase = async (): Promise<Partial<AgencyState> | nu
       result.teamMessages = fetchedMessages;
     }
 
-    if (invoicesRes.data && invoicesRes.data.length > 0) {
+    if (invoicesRes.data) {
       const fetchedInvoices: Invoice[] = invoicesRes.data.map((row: any) => ({
         id: row.id,
         num: row.num,
@@ -376,7 +378,7 @@ export const pullStateFromSupabase = async (): Promise<Partial<AgencyState> | nu
       };
     }
 
-    if (accountsRes.data && accountsRes.data.length > 0) {
+    if (accountsRes.data) {
       const fetchedAccounts: ClientAccount[] = accountsRes.data.map((row: any) => ({
         id: row.id,
         clientName: row.client_name,

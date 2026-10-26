@@ -11,89 +11,47 @@ import { useAgency } from '../../context/AgencyContext';
 import type { UserSession } from '../../types';
 
 export const AuthModal: React.FC = () => {
-  const { state, activeModal, closeModal, loginAsUser, showToast } = useAgency();
+  const { state, activeModal, closeModal, loginAsUser, loginWithCredentials, showToast } = useAgency();
   const [activeTab, setActiveTab] = useState<'switch' | 'credentials' | 'magic'>('switch');
   const [inputEmail, setInputEmail] = useState('');
   const [inputPassword, setInputPassword] = useState('');
-  const [magicEmail, setMagicEmail] = useState('sarah.jenkins@arccompany.io');
+  const [magicEmail, setMagicEmail] = useState('');
 
   if (activeModal !== 'auth') return null;
 
-  const demoAccounts: UserSession[] = [
-    {
-      id: 'usr-1',
-      name: 'Owais Anwer',
-      email: 'owais@vectorstudio.design',
-      role: 'admin',
-      adminRoleTitle: 'Managing Director & SuperAdmin',
-      avatar: '/assets/images/owais.jpg'
-    },
-    {
-      id: 'usr-2',
-      name: 'Carlos Mendes',
-      email: 'carlos@vectorstudio.design',
-      role: 'admin',
-      adminRoleTitle: 'Lead Design Architect',
-      avatar: '/assets/images/carlos.jpg'
-    },
-    {
-      id: 'usr-3',
-      name: 'Sarah Jenkins',
-      email: 'sarah.jenkins@arccompany.io',
-      role: 'client',
-      clientAccount: 'Arc Company',
-      avatar: '/assets/images/tommy.jpg'
-    },
-    {
-      id: 'usr-4',
-      name: 'Elena Rostova',
-      email: 'elena@nexuslabs.co',
-      role: 'client',
-      clientAccount: 'Nexus Labs',
-      avatar: '/assets/images/liam.jpg'
-    },
-    {
-      id: 'usr-5',
-      name: 'David Chen',
-      email: 'david.chen@luminahealth.org',
-      role: 'client',
-      clientAccount: 'Lumina Health',
-      avatar: '/assets/images/diego.jpg'
-    }
-  ];
+  const demoAccounts: UserSession[] = state.users.map(u => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    role: u.role,
+    adminRoleTitle: u.adminRoleTitle,
+    clientAccount: u.clientAccount,
+    avatar: u.avatar || '/assets/images/owais.jpg'
+  }));
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputEmail) {
-      showToast('Please enter an email address.');
+    if (!inputEmail.trim()) {
+      showToast('Please enter an email or username.');
       return;
     }
-    // Authenticate as matching demo account or create session
-    const matched = demoAccounts.find(a => a.email.toLowerCase() === inputEmail.toLowerCase());
-    if (matched) {
-      loginAsUser(matched);
+    const success = loginWithCredentials(inputEmail, inputPassword);
+    if (success) {
+      closeModal();
     } else {
-      const isClient = inputEmail.includes('@') && !inputEmail.includes('vectorstudio');
-      const customUser: UserSession = {
-        id: 'usr_' + Date.now(),
-        name: inputEmail.split('@')[0],
-        email: inputEmail,
-        role: isClient ? 'client' : 'admin',
-        adminRoleTitle: isClient ? undefined : 'Studio Member',
-        clientAccount: isClient ? 'Arc Company' : undefined,
-        avatar: '/assets/images/owais.jpg'
-      };
-      loginAsUser(customUser);
+      showToast('Invalid credentials. Please verify your username and password.');
     }
   };
 
   const handleSendMagicLink = (e: React.FormEvent) => {
     e.preventDefault();
     const token = `magic_${Math.random().toString(36).substring(2, 9)}`;
-    showToast(`Magic login link generated (token: ${token}) and dispatched to ${magicEmail}!`);
+    showToast(`Magic login link generated (token: ${token}) and dispatched to ${magicEmail || state.users[0]?.email}!`);
     setTimeout(() => {
-      const matched = demoAccounts.find(a => a.email.toLowerCase() === magicEmail.toLowerCase()) || demoAccounts[2];
-      loginAsUser(matched);
+      const matched = demoAccounts.find(a => a.email.toLowerCase() === (magicEmail || '').toLowerCase()) || demoAccounts[0];
+      if (matched) {
+        loginAsUser(matched);
+      }
     }, 1000);
   };
 
@@ -280,7 +238,7 @@ export const AuthModal: React.FC = () => {
                 className="form-input" 
                 value={inputEmail} 
                 onChange={(e) => setInputEmail(e.target.value)} 
-                placeholder="owais@vectorstudio.design" 
+                placeholder="timi or timi@vectorstudio.design" 
                 required 
               />
             </div>
@@ -299,7 +257,7 @@ export const AuthModal: React.FC = () => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '11.5px', color: '#78716c' }}>
-                Default: use any demo user email or studio credentials
+                Admin username: timi
               </span>
               <button type="submit" className="noventra-orange-btn">
                 <span>Sign In ↗</span>

@@ -163,7 +163,10 @@ const AgencyContext = createContext<AgencyContextType | undefined>(undefined);
 export const AgencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AgencyState>(() => {
     try {
-      const saved = localStorage.getItem('vectorstudio_agency_react_state');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('vectorstudio_agency_react_state');
+      }
+      const saved = typeof window !== 'undefined' ? localStorage.getItem('vectorstudio_agency_state_v3') : null;
       if (saved) {
         const parsed = JSON.parse(saved);
 
@@ -178,7 +181,7 @@ export const AgencyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           'Executive Assistant': { canViewFinances: true, canManageClients: true, canEditSprints: false, canApproveDeliverables: false, canManageSettings: true }
         };
 
-        const rawUsers: AppUser[] = parsed.users?.length ? parsed.users : INITIAL_AGENCY_STATE.users;
+        const rawUsers: AppUser[] = (parsed.users?.length && parsed.users[0]?.username === 'timi') ? parsed.users : INITIAL_AGENCY_STATE.users;
         const normalizedUsers = rawUsers.map(u => ({
           ...u,
           permissions: u.permissions || defaultPermsByRole[u.adminRoleTitle || 'Web Developer'] || {
@@ -195,20 +198,20 @@ export const AgencyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           ...parsed,
           isAuthenticated: typeof parsed.isAuthenticated === 'boolean' ? parsed.isAuthenticated : true,
           currentRole: parsed.currentRole || 'admin',
-          currentUser: parsed.currentUser || INITIAL_AGENCY_STATE.currentUser,
+          currentUser: (parsed.currentUser?.username === 'timi' || parsed.currentUser?.name === 'Timi') ? parsed.currentUser : INITIAL_AGENCY_STATE.currentUser,
           users: normalizedUsers,
-          meetings: parsed.meetings?.length ? parsed.meetings : (INITIAL_AGENCY_STATE.meetings || []),
-          teamMessages: parsed.teamMessages?.length ? parsed.teamMessages : (INITIAL_AGENCY_STATE.teamMessages || []),
+          meetings: parsed.meetings || [],
+          teamMessages: parsed.teamMessages || [],
           activeNav: 'overview',
           admin: {
             ...INITIAL_AGENCY_STATE.admin,
-            leads: parsed.admin?.leads?.length ? parsed.admin.leads : INITIAL_AGENCY_STATE.admin.leads,
-            proposals: parsed.admin?.proposals?.length ? parsed.admin.proposals : INITIAL_AGENCY_STATE.admin.proposals,
-            tasks: parsed.admin?.tasks?.length ? parsed.admin.tasks : INITIAL_AGENCY_STATE.admin.tasks,
-            retainers: (parsed.admin?.retainers?.length && parsed.admin.retainers[0]?.monthlyRevenue) ? parsed.admin.retainers : INITIAL_AGENCY_STATE.admin.retainers,
-            clientAccounts: parsed.admin?.clientAccounts?.length ? parsed.admin.clientAccounts : INITIAL_AGENCY_STATE.admin.clientAccounts,
+            leads: parsed.admin?.leads || [],
+            proposals: parsed.admin?.proposals || [],
+            tasks: parsed.admin?.tasks || [],
+            retainers: parsed.admin?.retainers || [],
+            clientAccounts: parsed.admin?.clientAccounts || [],
             rolesList: parsed.admin?.rolesList?.length ? parsed.admin.rolesList : INITIAL_AGENCY_STATE.admin.rolesList,
-            meetings: parsed.admin?.meetings?.length ? parsed.admin.meetings : (INITIAL_AGENCY_STATE.meetings || [])
+            meetings: parsed.admin?.meetings || []
           }
         };
       }
@@ -320,7 +323,7 @@ export const AgencyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     try {
-      localStorage.setItem('vectorstudio_agency_react_state', JSON.stringify(state));
+      localStorage.setItem('vectorstudio_agency_state_v3', JSON.stringify(state));
     } catch (e) {
       console.warn('LocalStorage save error:', e);
     }
